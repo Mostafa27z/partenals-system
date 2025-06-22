@@ -22,7 +22,7 @@
                     <th class="border p-2">سعر المشغل</th> 
                     <th class="border p-2">النوع</th> 
                     <th class="border p-2">ID</th> 
-                    <th class="border p-2">الغرامة</th> 
+                    <th class="border p-2">وصف النظام</th> 
                     <th class="border p-2">التحكم</th> 
                 </tr> 
             </thead> 
@@ -37,6 +37,7 @@
                         <td class="border p-2">{{ $plan->plan_code }}</td> 
                         <td class="border p-2">{{ $plan->penalty }}</td> 
                         <td class="border p-2"> 
+                            <a href="{{ route('plans.show', $plan->id) }}" class="text-green-600 hover:underline">عرض</a>
                             <a href="{{ route('plans.edit', $plan->id) }}" class="text-blue-500">تعديل</a> 
                             <form method="POST" action="{{ route('plans.destroy', $plan->id) }}" class="inline"> 
                                 @csrf 

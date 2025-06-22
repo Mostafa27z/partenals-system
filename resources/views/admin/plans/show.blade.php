@@ -10,7 +10,7 @@
         <p><strong>سعر المشغل:</strong> {{ $plan->provider_price }}</p>
         <p><strong>النوع:</strong> {{ $plan->type }}</p>
         <p><strong>ID:</strong> {{ $plan->plan_code }}</p>
-        <p><strong>الغرامة:</strong> {{ $plan->penalty }}</p>
+        <p><strong>وصف النظام:</strong> {{ $plan->penalty }}</p>
 
         <a href="{{ route('plans.edit', $plan->id) }}" class="text-blue-500">تعديل</a>
     </div>

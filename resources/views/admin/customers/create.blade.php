@@ -1,9 +1,6 @@
-<!-- resources/views/admin/customers/create.blade.php -->
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold text-gray-800 leading-tight">
-            إضافة عميل جديد
-        </h2>
+        <h2 class="text-xl font-semibold text-gray-800 leading-tight">إضافة عميل جديد</h2>
     </x-slot>
 
     <div class="py-6 max-w-4xl mx-auto sm:px-6 lg:px-8">
@@ -25,13 +22,26 @@
             </div>
 
             <div>
-                <label class="block font-medium">رقم الهاتف</label>
-                <input type="text" name="phone_number" class="mt-1 block w-full rounded border-gray-300" required>
+                <label class="block font-medium">الرقم القومي</label>
+                <input type="text" name="national_id" class="mt-1 block w-full rounded border-gray-300" required>
             </div>
 
             <div>
-                <label class="block font-medium">الرقم القومي</label>
-                <input type="text" name="national_id" class="mt-1 block w-full rounded border-gray-300">
+                <label class="block font-medium">تاريخ الميلاد</label>
+                <input type="date" name="birth_date" class="mt-1 block w-full rounded border-gray-300">
+            </div>
+
+            <div>
+                <label class="block font-medium">البريد الإلكتروني</label>
+                <input type="email" name="email" class="mt-1 block w-full rounded border-gray-300">
+            </div>
+
+            <hr class="my-4">
+            <h3 class="font-bold text-lg">معلومات الخط الأول</h3>
+
+            <div>
+                <label class="block font-medium">رقم الهاتف</label>
+                <input type="text" name="phone_number" class="mt-1 block w-full rounded border-gray-300" required>
             </div>
 
             <div>
@@ -39,10 +49,16 @@
                 <input type="text" name="provider" class="mt-1 block w-full rounded border-gray-300">
             </div>
 
+            <div>
+                <label class="block font-medium">نوع الخط</label>
+                <select name="line_type" class="mt-1 block w-full rounded border-gray-300">
+                    <option value="prepaid">مدفوع مسبقاً</option>
+                    <option value="postpaid">فاتورة</option>
+                </select>
+            </div>
+
             <div class="flex justify-end">
-                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    حفظ
-                </button>
+                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">حفظ</button>
             </div>
         </form>
     </div>

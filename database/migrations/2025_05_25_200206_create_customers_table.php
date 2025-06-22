@@ -12,18 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('customers', function (Blueprint $table) {
-            $table->id();
-            $table->string('full_name')->nullable();
-            $table->string('status')->nullable();
-            $table->string('offer_name')->nullable();
-            $table->string('branch_name')->nullable();
-            $table->string('employee_name')->nullable();
-            $table->string('gcode')->nullable();
-            $table->string('phone_number')->nullable()->unique();
-            $table->string('provider')->nullable();
-            $table->string('national_id')->nullable()->unique();
-            $table->timestamps();
-        });
+    $table->id();
+    $table->string('full_name');
+    $table->string('national_id')->unique();
+    $table->date('birth_date')->nullable();
+    $table->string('email')->nullable();
+    $table->timestamps();
+});
+
     }
 
     /**

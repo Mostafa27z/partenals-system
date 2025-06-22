@@ -26,7 +26,7 @@
         <input type="text" name="identifier" class="w-full border p-2 rounded" value="{{ old('identifier', $plan->identifier ?? '') }}">
     </div>
     <div>
-        <label>الغرامة:</label>
+        <label>وصف النظام:</label>
         <input type="number" name="penalty" step="0.01" class="w-full border p-2 rounded" value="{{ old('penalty', $plan->penalty ?? '') }}">
     </div>
 </div>

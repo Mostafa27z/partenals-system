@@ -18,9 +18,19 @@
             </div>
 
             <div>
-                <label class="block font-medium">مشغل الخدمة</label>
-                <input type="text" name="provider" class="w-full border rounded px-3 py-2">
-            </div>
+    <label class="block font-medium">مشغل الخدمة</label>
+    <select name="provider" class="w-full border rounded px-3 py-2">
+        <option value="" >
+                اختر مشغل الخدمة
+            </option>
+        @foreach(['Vodafone', 'Etisalat', 'Orange', 'WE'] as $provider)
+            <option value="{{ $provider }}" >
+                {{ $provider }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
 
             <div>
                 <label class="block font-medium">سعر المشغل</label>
@@ -38,7 +48,7 @@
             </div>
 
             <div>
-                <label class="block font-medium">الغرامة</label>
+                <label class="block font-medium">وصف النظام</label>
                 <input type="text" name="penalty" class="w-full border rounded px-3 py-2">
             </div>
 

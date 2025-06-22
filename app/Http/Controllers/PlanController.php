@@ -42,7 +42,7 @@ public function store(Request $request)
         'provider_price' => 'nullable|numeric',
         'type' => 'nullable|string',
         'identifier' => 'nullable|string',
-        'penalty' => 'nullable|numeric',
+        'penalty' => 'nullable|string',
         'plan_code' => 'nullable',
         
     ]);
@@ -66,7 +66,7 @@ public function update(Request $request, Plan $plan)
         'provider_price' => 'nullable|numeric',
         'type' => 'nullable|string',
         'identifier' => 'nullable|string',
-        'penalty' => 'nullable|numeric',
+        'penalty' => 'nullable|string',
         'plan_code' => 'nullable',
     ]);
 

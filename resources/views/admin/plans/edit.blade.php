@@ -19,9 +19,16 @@
             </div>
 
             <div>
-                <label class="block font-medium">مشغل الخدمة</label>
-                <input type="text" name="provider" value="{{ $plan->provider }}" class="w-full border rounded px-3 py-2">
-            </div>
+    <label class="block font-medium">مشغل الخدمة (GCode)</label>
+    <select name="provider" class="w-full border rounded px-3 py-2">
+        @foreach(['010', '011', '012', '015'] as $code)
+            <option value="{{ $code }}" {{ old('provider', $plan->provider) == $code ? 'selected' : '' }}>
+                {{ $code }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
 
             <div>
                 <label class="block font-medium">سعر المشغل</label>
@@ -39,7 +46,7 @@
             </div>
 
             <div>
-                <label class="block font-medium">الغرامة</label>
+                <label class="block font-medium">وصف النظام</label>
                 <input type="text" name="penalty" value="{{ $plan->penalty }}" class="w-full border rounded px-3 py-2">
             </div>
 

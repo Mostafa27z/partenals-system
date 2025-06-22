@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('provider_price', 10, 2)->nullable();
             $table->string('type')->nullable();
             $table->string('plan_code')->nullable(); // ID
-            $table->decimal('penalty', 10, 2)->nullable();
+            $table->string('penalty')->nullable();
             $table->timestamps();
         });
 

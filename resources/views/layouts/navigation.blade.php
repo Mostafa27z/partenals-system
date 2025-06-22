@@ -23,7 +23,12 @@
     <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
         العملاء
     </x-nav-link>
-
+    <x-nav-link :href="route('lines.all')" :active="request()->routeIs('lines.*')">
+        الخطوط
+    </x-nav-link>
+<x-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
+        الفواتير
+    </x-nav-link>
     <x-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.*')">
         الصلاحيات
     </x-nav-link>
@@ -91,8 +96,10 @@
     <x-responsive-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
         العملاء
     </x-responsive-nav-link>
-
     <x-responsive-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.*')">
+        الفواتير
+    </x-responsive-nav-link>
+    <x-responsive-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
         الصلاحيات
     </x-responsive-nav-link>
 </div>

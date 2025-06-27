@@ -20,6 +20,8 @@
                             <th class="px-4 py-2">نوع الخط</th>
                             <th class="px-4 py-2">المزود</th>
                             <th class="px-4 py-2">النظام</th>
+                            <th class="px-4 py-2">الحالة</th>
+                            
                             <th class="px-4 py-2">تاريخ الدفع</th>
                             <th class="px-4 py-2">العمليات</th>
                         </tr>
@@ -31,6 +33,9 @@
                                 <td class="px-4 py-2">{{ $line->line_type == 'prepaid' ? 'مدفوع مسبقاً' : 'فاتورة' }}</td>
                                 <td class="px-4 py-2">{{ $line->provider }}</td>
                                 <td class="px-4 py-2">{{ $line->plan->name ?? '-' }}</td>
+                                <td class="px-4 py-2">
+                                    {{ $line->status === 'active' ? 'نشط' : 'غير نشط' }}
+                                </td>
                                 <td class="px-4 py-2">{{ $line->payment_date }}</td>
                                 <td class="px-4 py-2">
                                     <a href="{{ route('customers.lines.edit', [$customer, $line]) }}" class="text-blue-500">تعديل</a> |

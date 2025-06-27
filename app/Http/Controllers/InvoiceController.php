@@ -8,7 +8,7 @@ use App\Models\Line;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-
+ use App\Models\Plan;
 class InvoiceController extends Controller
 {
    
@@ -90,7 +90,7 @@ if ($request->filled('to')) {
     $invoices = $query->latest('invoice_month')->paginate(20);
     $total = $query->sum('amount');
 
-    $plans = \App\Models\Plan::all(); // للفلترة بنظام
+    $plans = Plan::all(); // للفلترة بنظام
 
     return view('admin.invoices.index', compact('invoices', 'total', 'plans'));
 }
@@ -132,36 +132,41 @@ if ($request->filled('to')) {
 }
 
 
- public function lineInvoices(Request $request, Line $line)
+
+
+public function lineInvoices(Request $request, Line $line) 
 {
     $query = $line->invoices()->with('user');
 
-   if ($request->filled('provider')) {
-    $query->whereHas('line', fn($q) => $q->whereIn('provider', $request->provider));
-}
+    if ($request->filled('provider')) {
+        $query->whereHas('line', fn($q) => $q->whereIn('provider', $request->provider));
+    }
 
-if ($request->filled('line_type')) {
-    $query->whereHas('line', fn($q) => $q->whereIn('line_type', $request->line_type));
-}
+    if ($request->filled('line_type')) {
+        $query->whereHas('line', fn($q) => $q->whereIn('line_type', $request->line_type));
+    }
 
-if ($request->filled('plan_id')) {
-    $query->whereHas('line', fn($q) => $q->whereIn('plan_id', $request->plan_id));
-}
+    if ($request->filled('plan_id')) {
+        $query->whereHas('line', fn($q) => $q->whereIn('plan_id', $request->plan_id));
+    }
 
-if ($request->filled('is_paid')) {
-    $query->whereIn('is_paid', $request->is_paid);
-}
+    if ($request->filled('is_paid')) {
+        $query->whereIn('is_paid', $request->is_paid);
+    }
 
-if ($request->filled('from')) {
-    $query->whereDate('invoice_month', '>=', $request->from);
-}
-if ($request->filled('to')) {
-    $query->whereDate('invoice_month', '<=', $request->to);
-}
+    if ($request->filled('from')) {
+        $query->whereDate('invoice_month', '>=', $request->from);
+    }
+
+    if ($request->filled('to')) {
+        $query->whereDate('invoice_month', '<=', $request->to);
+    }
+
     $invoices = $query->latest('invoice_month')->paginate(20);
     $total = $query->sum('amount');
+    $plans = Plan::all(); // ✅ إضافة هذا السطر
 
-    return view('admin.invoices.by-line', compact('line', 'invoices', 'total'));
+    return view('admin.invoices.by-line', compact('line', 'invoices', 'total', 'plans'));
 }
 
 }

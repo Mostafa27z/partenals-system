@@ -54,6 +54,19 @@
                     <option value="postpaid" {{ old('line_type', $line->line_type) == 'postpaid' ? 'selected' : '' }}>فاتورة</option>
                 </select>
             </div>
+            <!-- Status -->
+            <div>
+                <label class="block font-medium">حالة الخط</label>
+                <select name="status" class="input input-bordered w-full" required>
+                    <option value="active" {{ old('status', $line->status) === 'active' ? 'selected' : '' }}>نشط</option>
+                    <option value="inactive" {{ old('status', $line->status) === 'inactive' ? 'selected' : '' }}>غير نشط</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-medium">الموزع</label>
+                <input type="text" name="distributor" class="input input-bordered w-full"
+                    value="{{ old('distributor', $line->distributor ?? '') }}">
+            </div>
 
             <!-- Plan -->
             <div>

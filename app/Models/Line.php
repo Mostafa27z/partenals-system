@@ -26,8 +26,16 @@ class Line extends Model
         'last_invoice_date',
         'notes',
         'added_by',
+        'distributor',
+        'attached_at'
     ];
+// protected $dates = ['attached_at'];
+// أو في Laravel 10+ يمكن استخدام:
+// protected $casts = [
+//     'attached_at' => 'date',
+// ];
 
+protected $dates = ['attached_at'];
     /**
      * العلاقة مع العميل
      */

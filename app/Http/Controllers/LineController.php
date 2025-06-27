@@ -121,6 +121,9 @@ public function importProcess(Request $request)
         if ($request->filled('phone')) {
             $query->where('phone_number', 'like', '%' . $request->phone . '%');
         }
+        if ($request->filled('distributor')) {
+            $query->where('distributor', 'like', '%' . $request->distributor . '%');
+        }
 
         if ($request->filled('provider')) {
             $query->where('provider', 'like', '%' . $request->provider . '%');
@@ -165,7 +168,13 @@ public function importProcess(Request $request)
         //     return back()->withErrors(['provider' => 'مزود الخدمة لا يتطابق مع كود الخط المحدد'])->withInput();
         // }
 
-        $customer->lines()->create(array_merge($validated, ['added_by' => Auth::id()]));
+        $customer->lines()->create(array_merge(
+    $validated,
+    [
+        'added_by' => Auth::id(),
+        'attached_at' => now(),
+    ]
+));
 
         return redirect()->route('customers.show', $customer)->with('success', 'تم إضافة الخط بنجاح');
     }
@@ -176,27 +185,28 @@ public function importProcess(Request $request)
         return view('admin.lines.edit', compact('customer', 'line', 'plans'));
     }
 
-    public function update(Request $request, Customer $customer, Line $line)
-    {
-        $validated = $request->validate($this->rules($line->id));
+   public function update(Request $request, Customer $customer, Line $line) 
+{
+    $validated = $request->validate($this->rules($line->id));
 
-        $full_number = $validated['phone_number'];
-        $exists = Line::whereRaw("CONCAT(gcode, phone_number) = ?", [$full_number])
-                      ->where('id', '!=', $line->id)->exists();
+    $full_number = $validated['phone_number'];
+    $exists = Line::whereRaw("CONCAT(gcode, phone_number) = ?", [$full_number])
+                  ->where('id', '!=', $line->id)->exists();
 
-        if ($exists) {
-            return back()->withErrors(['phone_number' => 'رقم الهاتف هذا مستخدم بالفعل'])->withInput();
-        }
-
-        // $expectedProviders = $this->expectedProviders();
-        // if ($expectedProviders[$validated['gcode']] !== $validated['provider']) {
-        //     return back()->withErrors(['provider' => 'مزود الخدمة لا يتطابق مع كود الخط المحدد'])->withInput();
-        // }
-
-        $line->update($validated);
-
-        return redirect()->route('customers.show', $customer)->with('success', 'تم تعديل بيانات الخط');
+    if ($exists) {
+        return back()->withErrors(['phone_number' => 'رقم الهاتف هذا مستخدم بالفعل'])->withInput();
     }
+
+    // إذا تغيّر العميل، حدّث تاريخ الربط
+    if (array_key_exists('customer_id', $validated) && $validated['customer_id'] != $line->customer_id) {
+        $validated['attached_at'] = now();
+    }
+
+    $line->update($validated);
+
+    return redirect()->route('customers.show', $customer)->with('success', 'تم تعديل بيانات الخط');
+}
+
 
     public function destroy(Customer $customer, Line $line)
     {
@@ -239,7 +249,11 @@ public function importProcess(Request $request)
             $validated['customer_id'] = $customer->id;
         }
 
-        Line::create(array_merge($validated, ['added_by' => Auth::id()]));
+        Line::create(array_merge($validated, [
+    'added_by' => Auth::id(),
+    'attached_at' => now(),
+]));
+
 
         return redirect()->route('lines.create')->with('success', 'تمت إضافة الخط بنجاح');
     }
@@ -273,19 +287,19 @@ public function show(Line $line)
 //     return response()->json($customers);
 // }
 
-    public function updateStandalone(Request $request, Line $line)
+  public function updateStandalone(Request $request, Line $line) 
 {
-    $validated = $request->validate(array_merge(
-        $this->rules($line->id),
-        [
-            'customer_id'      => 'nullable|exists:customers,id',
-            'new_full_name'    => 'nullable|string|max:255',
-            'new_national_id'  => 'nullable|string|size:14|unique:customers,national_id',
-        ]
+    $validated = $request->validate(array_merge( 
+        $this->rules($line->id), 
+        [ 
+            'customer_id'      => 'nullable|exists:customers,id', 
+            'new_full_name'    => 'nullable|string|max:255', 
+            'new_national_id'  => 'nullable|string|size:14|unique:customers,national_id', 
+        ] 
     ));
 
     // التأكد من عدم تكرار الرقم الكامل
-    $full_number =  $validated['phone_number'];
+    $full_number = $validated['phone_number'];
     $exists = Line::whereRaw("CONCAT(gcode, phone_number) = ?", [$full_number])
         ->where('id', '!=', $line->id)
         ->exists();
@@ -294,15 +308,8 @@ public function show(Line $line)
         return back()->withErrors(['phone_number' => 'رقم الهاتف هذا مستخدم بالفعل'])->withInput();
     }
 
-    // التحقق من مزود الخدمة
-    // $expectedProviders = $this->expectedProviders();
-    // if ($expectedProviders[$validated['gcode']] !== $validated['provider']) {
-    //     return back()->withErrors(['provider' => 'مزود الخدمة لا يتطابق مع كود الخط المحدد'])->withInput();
-    // }
-
-    // معالجة العميل:
+    // إنشاء عميل جديد إذا لم يتم اختيار واحد وكان الاسم والرقم القومي موجودين
     if (!$request->customer_id && $request->filled(['new_full_name', 'new_national_id'])) {
-        // إنشاء عميل جديد
         $customer = Customer::create([
             'full_name'   => $request->new_full_name,
             'national_id' => $request->new_national_id,
@@ -310,13 +317,18 @@ public function show(Line $line)
         $validated['customer_id'] = $customer->id;
     }
 
-    // تحديث بيانات الخط وربطه بالعميل (أو لا)
+    // تحقق مما إذا كان العميل قد تغيّر
+    $customerChanged = isset($validated['customer_id']) && $validated['customer_id'] != $line->customer_id;
+
+    // تحديث بيانات الخط وربطه بالعميل مع تحديث attached_at إذا تغيّر العميل
     $line->update(array_merge($validated, [
         'customer_id' => $validated['customer_id'] ?? null,
+        'attached_at' => $customerChanged ? now() : $line->attached_at,
     ]));
 
     return redirect()->route('lines.all')->with('success', 'تم تحديث بيانات الخط بنجاح');
 }
+
 
 
     public function destroyStandalone(Line $line)

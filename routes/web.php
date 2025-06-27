@@ -8,6 +8,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PlanController;
 // use App\Http\Controllers\UserController;
 use App\Http\Controllers\LineController;
+use App\Http\Controllers\RequestController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/permissions', [PermissionController::class, 'index'])->name('permissions.index');
@@ -103,15 +104,30 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 });
 // search
 Route::middleware(['auth'])->prefix('admin')->group(function () {
+    // كل الراوتس دي لازم تبقى هنا:
     Route::get('/ajax/customers/search', [CustomerController::class, 'searchByNationalId'])->name('ajax.customers.search');
+
+    
 });
 
-// web.php
-Route::get('/ajax/customers/search', [CustomerController::class, 'searchByNationalId'])->name('ajax.customers.search');
+Route::get('/requests/stop-lines', [RequestController::class, 'stopLineRequests'])->name('requests.stop-lines');
+    Route::get('/requests/resell/{line}/create', [RequestController::class, 'createResell'])->name('requests.resell.create');
+    Route::post('/requests/resell/store', [RequestController::class, 'storeResell'])->name('requests.resell.store');
+    Route::get('/requests/resell/choose-line', [RequestController::class, 'chooseLineForResell'])->name('requests.resell.choose-line');
+    Route::put('/requests/{request}', [RequestController::class, 'updateStatus'])->name('requests.update-status');
 
-
+// // web.php
+ Route::get('/ajax/customers/search', [CustomerController::class, 'searchByNationalId'])->name('ajax.customers.search');
 });
 
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/requests/resell/choose-line', [RequestController::class, 'chooseLineForResell'])->name('requests.resell.choose-line');
+    Route::get('/requests/resell/{line}/create', [RequestController::class, 'createResell'])->name('requests.resell.create');
+    Route::post('/requests/resell/store', [RequestController::class, 'storeResell'])->name('requests.resell.store');
+    Route::get('/requests/resell', [RequestController::class, 'resellRequests'])->name('requests.resell.index');
+    Route::get('/requests/resell/{request}/details', [RequestController::class, 'resellDetails'])->name('requests.resell.details');
+    Route::get('/requests/change-plan/{line}', [RequestController::class, 'createChangePlan'])->name('requests.change-plan.create');
+    Route::post('/requests/change-plan', [RequestController::class, 'storeChangePlan'])->name('requests.change-plan.store');
 
-
+});
 require __DIR__.'/auth.php';

@@ -20,6 +20,8 @@
                 <input type="text" name="phone" value="{{ request('phone') }}" placeholder="رقم الهاتف" class="input input-bordered w-full sm:w-40" />
                 <input type="text" name="customer" value="{{ request('customer') }}" placeholder="اسم العميل" class="input input-bordered w-full sm:w-40" />
                 <input type="text" name="provider" value="{{ request('provider') }}" placeholder="المزود" class="input input-bordered w-full sm:w-40" />
+                <input type="text" name="distributor" value="{{ request('distributor') }}" placeholder="الموزع" class="input input-bordered w-full sm:w-40" />
+
                 <button class="btn btn-primary">بحث</button>
             </form>
         </div>
@@ -34,6 +36,11 @@
                         <th class="px-4 py-2">المزود</th>
                         <th class="px-4 py-2">النظام</th>
                         <th class="px-4 py-2">GCode</th>
+                        <th class="px-4 py-2">الموزع</th>
+                        <th class="px-4 py-2">تاريخ الربط</th>
+                        <th class="px-4 py-2">الحالة</th>
+                        <th class="px-4 py-2">آخر فاتورة</th>
+
                         <th class="px-4 py-2">الفواتير</th>
                         <th class="px-4 py-2">العمليات</th>
                     </tr>
@@ -47,6 +54,16 @@
                             <td class="px-4 py-2">{{ $line->provider }}</td>
                             <td class="px-4 py-2">{{ $line->plan->name ?? '-' }}</td>
                             <td class="px-4 py-2">{{ $line->gcode }}</td>
+                            <td class="px-4 py-2">{{ $line->distributor ?? '-' }}</td>
+                            <td>{{ \Carbon\Carbon::parse($line->attached_at)->format('Y-m-d') ?? '-' }}</td>
+
+                            <td class="px-4 py-2">
+                                {{ $line->status === 'active' ? 'نشط' : 'غير نشط' }}
+                            </td>
+                            <td class="px-4 py-2">
+                                {{ $line->last_invoice_date ? \Carbon\Carbon::parse($line->last_invoice_date)->format('Y-m-d') : '-' }}
+                            </td>
+
                             <td class="px-4 py-2">
                                 <a href="{{ route('lines.invoices', $line->id) }}" class="text-blue-500">عرض الفواتير</a>
                             </td>

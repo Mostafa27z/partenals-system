@@ -45,6 +45,10 @@
             <input type="text" id="total-price" class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2" 
                    readonly> 
         </div> 
+        <div class="mb-4">
+            <label class="block font-bold mb-1">📅 سيتم الدفع من</label>
+            <input type="text" id="period-range" class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2" readonly>
+        </div>
 
         <div class="mb-4">
             <label class="block font-bold mb-1">ملاحظات</label>
@@ -57,18 +61,34 @@
         </div> 
     </form> 
 
-    @push('scripts') 
-        <script> 
-            document.addEventListener('DOMContentLoaded', function () { 
-                const monthlyPrice = parseFloat(document.getElementById('monthly-price').value) || 0; 
-                const monthsInput = document.getElementById('months-count'); 
-                const totalPrice = document.getElementById('total-price'); 
+   @push('scripts')  
+<script>  
+    document.addEventListener('DOMContentLoaded', function () {  
+        const monthlyPrice = parseFloat(document.getElementById('monthly-price').value) || 0;  
+        const monthsInput = document.getElementById('months-count');  
+        const totalPrice = document.getElementById('total-price');  
+        const periodRange = document.getElementById('period-range');
 
-                monthsInput.addEventListener('input', function () { 
-                    const months = parseInt(monthsInput.value) || 0; 
-                    totalPrice.value = (months * monthlyPrice).toFixed(2); 
-                }); 
-            }); 
-        </script> 
-    @endpush 
+        monthsInput.addEventListener('input', function () {  
+            const months = parseInt(monthsInput.value) || 0;  
+            totalPrice.value = (months * monthlyPrice).toFixed(2);  
+
+            if (months > 0) {
+                const start = new Date(); // تاريخ اليوم
+                const end = new Date(start);
+                end.setMonth(start.getMonth() + months - 1);
+
+                const options = { year: 'numeric', month: 'long' };
+                const from = start.toLocaleDateString('ar-EG', options);
+                const to = end.toLocaleDateString('ar-EG', options);
+
+                periodRange.value = `من ${from} إلى ${to}`;
+            } else {
+                periodRange.value = '';
+            }
+        });  
+    });  
+</script>  
+@endpush
+
 </x-app-layout>

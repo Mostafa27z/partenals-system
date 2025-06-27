@@ -35,6 +35,11 @@
                 <input type="text" name="phone_number" class="input input-bordered w-full"
                        value="{{ old('phone_number') }}" required>
             </div>
+<div>
+    <label class="block font-medium">الموزع</label>
+    <input type="text" name="distributor" class="input input-bordered w-full"
+           value="{{ old('distributor', $line->distributor ?? '') }}">
+</div>
 
             <div>
                 <label class="block font-medium">مزود الخدمة</label>

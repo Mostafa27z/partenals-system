@@ -7,11 +7,16 @@ use Illuminate\Http\Request as HttpRequest;
 use App\Models\Request as RequestModel;
 use App\Models\User;
 use App\Models\RequestResell;
+use App\Models\RequestResumeLine;
 use App\Models\Line;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\Plan;
 use App\Models\RequestChangePlan;
+use App\Models\RequestChangeChip;
+use App\Models\RequestPauseLine;
+// use App\Models\LineRequest;
+
 class RequestController extends Controller
 
 {
@@ -304,5 +309,121 @@ public function storeChangePlan(HttpRequest $request)
     ]);
 
     return redirect()->route('requests.stop-lines')->with('success', '✅ تم تقديم طلب تغيير النظام بنجاح.');
+}
+// In RequestController.php
+
+
+
+public function createChangeChip(Line $line)
+{
+    return view('admin.requests.create-change-chip', compact('line'));
+}
+
+public function storeChangeChip(HttpRequest $request)
+{
+    $validated = $request->validate([
+    'line_id'      => 'required|exists:lines,id',
+    'change_type'  => 'required|in:chip,branch',
+    'old_serial'   => 'nullable|regex:/^\d+$/|size:19',
+    'new_serial'   => 'required_if:change_type,chip|regex:/^\d+$/|size:19',
+    'request_date' => 'required|date',
+    'comment'      => 'nullable|string|max:1000',
+    'full_name'    => 'nullable|required_if:change_type,branch|string|max:255',
+    'national_id'  => 'nullable|required_if:change_type,branch|digits:14',
+], [
+    'change_type.required'     => 'يجب اختيار نوع  التغيير.',
+    'new_serial.required_if'   => 'يجب إدخال المسلسل الجديد عند اختيار نوع الشريحة.',
+    'new_serial.regex'         => 'المسلسل الجديد يجب أن يحتوي على أرقام فقط.',
+    'old_serial.regex'         => 'المسلسل القديم يجب أن يحتوي على أرقام فقط.',
+    'full_name.required_if'    => 'يجب إدخال الاسم عند اختيار النوع فرع.',
+    'national_id.required_if'  => 'يجب إدخال الرقم القومي عند اختيار النوع فرع.',
+    'national_id.digits'       => 'الرقم القومي يجب أن يكون 14 رقمًا.',
+]);
+
+    $line = \App\Models\Line::findOrFail($validated['line_id']);
+
+    $requestModel = \App\Models\Request::create([
+        'line_id'      => $line->id,
+        'customer_id'  => $line->customer_id,
+        'request_type' => 'change_chip',
+        'status'       => 'pending',
+        'requested_by' => auth()->id(),
+    ]);
+
+    \App\Models\RequestChangeChip::create([
+        'request_id'   => $requestModel->id,
+        'change_type'  => $validated['change_type'],
+        'old_serial'   => $validated['old_serial'] ?? null,
+        'new_serial'   => $validated['new_serial'] ?? null,
+        'full_name'    => $validated['full_name'] ?? null,
+        'national_id'  => $validated['national_id'] ?? null,
+        'request_date' => $validated['request_date'],
+        'comment'      => $validated['comment'] ?? null,
+    ]);
+
+    return redirect()->route('requests.stop-lines')->with('success', '✅ تم إنشاء طلب تغيير الشريحة بنجاح');
+}
+public function createPause($lineId)
+{
+    $line = Line::with('customer')->findOrFail($lineId);
+    return view('admin.requests.create-pause-request', compact('line'));
+}
+public function storePause(HttpRequest $request)
+{
+    $validated = $request->validate([
+        'line_id'     => 'required|exists:lines,id',
+        'reason'      => 'required|string|max:255',
+        'comment'     => 'nullable|string|max:1000',
+    ]);
+
+    $line = Line::findOrFail($validated['line_id']);
+
+    $requestModel = RequestModel::create([
+        'line_id'      => $line->id,
+        'customer_id'  => $line->customer_id,
+        'request_type' => 'pause',
+        'status'       => 'pending',
+        'requested_by' => auth()->id(),
+    ]);
+
+    RequestPauseLine::create([
+        'request_id' => $requestModel->id,
+        'reason'     => $validated['reason'],
+        'comment'    => $validated['comment'],
+    ]);
+
+    return redirect()->route('requests.stop-lines')->with('success', '✅ تم إنشاء طلب الإيقاف المؤقت بنجاح');
+}
+public function createResume($lineId)
+{
+    $line = Line::with('customer')->findOrFail($lineId);
+    return view('admin.requests.create-resume', compact('line'));
+}
+
+public function storeResume(HttpRequest $request)
+{
+    $validated = $request->validate([
+        'line_id' => 'required|exists:lines,id',
+        'reason' => 'required|string|max:255',
+        'comment' => 'nullable|string|max:1000',
+    ]);
+
+    $line = Line::findOrFail($validated['line_id']);
+
+    $req = RequestModel::create([
+        'line_id' => $line->id,
+        'customer_id' => $line->customer_id,
+        'request_type' => 'resume',
+        'status' => 'pending',
+        'requested_by' => auth()->id(),
+    ]);
+
+    RequestResumeLine::create([
+        'request_id' => $req->id,
+        'reason' => $validated['reason'],
+        'comment' => $validated['comment'],
+    ]);
+
+    return redirect()->route('requests.stop-lines')->with('success', '✅ تم إنشاء طلب إعادة التشغيل بنجاح.');
 }
 }

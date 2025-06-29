@@ -40,11 +40,8 @@ public function resellDetails()
 {
     return $this->hasOne(RequestResell::class);
 }
-
-
-
-
-
-
-
+public function changeChip()
+{
+    return $this->hasOne(RequestChangeChip::class);
+}
 }

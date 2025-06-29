@@ -122,12 +122,18 @@ Route::get('/requests/stop-lines', [RequestController::class, 'stopLineRequests'
 
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/requests/resell/choose-line', [RequestController::class, 'chooseLineForResell'])->name('requests.resell.choose-line');
-    Route::get('/requests/resell/{line}/create', [RequestController::class, 'createResell'])->name('requests.resell.create');
+    Route::get('/requests/resell/{line}', [RequestController::class, 'createResell'])->name('requests.resell.create');
     Route::post('/requests/resell/store', [RequestController::class, 'storeResell'])->name('requests.resell.store');
     Route::get('/requests/resell', [RequestController::class, 'resellRequests'])->name('requests.resell.index');
     Route::get('/requests/resell/{request}/details', [RequestController::class, 'resellDetails'])->name('requests.resell.details');
     Route::get('/requests/change-plan/{line}', [RequestController::class, 'createChangePlan'])->name('requests.change-plan.create');
     Route::post('/requests/change-plan', [RequestController::class, 'storeChangePlan'])->name('requests.change-plan.store');
+    Route::get('/requests/change-chip/{line}', [RequestController::class, 'createChangeChip'])->name('requests.change-chip.create');
+    Route::post('/requests/change-chip/store', [RequestController::class, 'storeChangeChip'])->name('requests.change-chip.store');
+    Route::get('/requests/pause/{line}', [RequestController::class, 'createPause'])->name('requests.pause.create');
+    Route::post('/requests/pause/store', [RequestController::class, 'storePause'])->name('requests.pause.store');
+    Route::get('/requests/resume/{line}/create', [RequestController::class, 'createResume'])->name('requests.resume.create');
+    Route::post('/requests/resume/store', [RequestController::class, 'storeResume'])->name('requests.resume.store');
 
 });
 require __DIR__.'/auth.php';

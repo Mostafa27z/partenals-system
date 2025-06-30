@@ -30,8 +30,8 @@
 
             <!-- Phone Number -->
             <div>
-                <label class="block font-medium">رقم الهاتف (9 أرقام)</label>
-                <input type="text" name="phone_number" class="input input-bordered w-full" value="{{ old('phone_number', $line->phone_number) }}" required>
+                <label class="block font-medium">رقم الهاتف </label>
+                <input disabled='' type="text" name="phone_number" class="input input-bordered w-full" value="{{ old('phone_number', $line->phone_number) }}" required>
             </div>
 
             <!-- Provider -->

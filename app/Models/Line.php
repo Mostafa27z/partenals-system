@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Traits\LogsChanges;
 class Line extends Model
 {
     use HasFactory;
+    use LogsChanges;
+
     // تحديد الحقول التي يُسمح بتعبئتها
     protected $fillable = [
         'customer_id',
@@ -27,7 +30,7 @@ class Line extends Model
         'notes',
         'added_by',
         'distributor',
-        'attached_at'
+        'attached_at','for_sale', 'sale_price',
     ];
 // protected $dates = ['attached_at'];
 // أو في Laravel 10+ يمكن استخدام:

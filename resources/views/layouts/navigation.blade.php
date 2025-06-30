@@ -7,11 +7,18 @@
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        <!-- Back Button -->
+                        <a href="{{ url()->previous() }}"
+                        class="hidden sm:inline-flex items-center px-4 py-2 bg-gray-100 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-200 transition">
+                            ⬅ العودة
+                        </a>
+
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex items-center">
+
     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
         لوحة التحكم
     </x-nav-link>
@@ -23,16 +30,45 @@
     <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
         العملاء
     </x-nav-link>
+
     <x-nav-link :href="route('lines.all')" :active="request()->routeIs('lines.*')">
         الخطوط
     </x-nav-link>
-<x-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
+
+    <x-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
         الفواتير
     </x-nav-link>
+
     <x-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.*')">
         الصلاحيات
     </x-nav-link>
+    <x-nav-link :href="route('change-logs.index')" :active="request()->routeIs('change-logs.*')">
+        سجل التعديلات
+    </x-nav-link>
+
+    <!-- ✅ Dropdown: الطلبات -->
+    <div x-data="{ open: false }" class="relative">
+        <button @click="open = !open"
+                class="flex items-center gap-1 px-3 py-2 text-gray-600 hover:text-gray-800 transition">
+            الطلبات
+            <svg class="h-4 w-4 transition" :class="{ 'rotate-180': open }"
+                 xmlns="http://www.w3.org/2000/svg" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+
+        <div x-show="open" @click.away="open = false"
+             class="absolute mt-2 bg-white rounded shadow-lg border z-50 w-48">
+            <a href="{{ route('requests.all') }}"
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📄 كل الطلبات</a>
+            <a href="{{ route('requests.summary') }}"
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📊 ملخص الطلبات</a>
+        </div>
+    </div>
 </div>
+
 
             </div>
 

@@ -10,12 +10,14 @@ use App\Models\RequestResell;
 use App\Models\RequestResumeLine;
 use App\Models\Line;
 use Illuminate\Support\Facades\Auth;
-
+use App\Models\RequestChangeDistributor;
 use App\Models\Plan;
 use App\Models\RequestChangePlan;
 use App\Models\RequestChangeChip;
 use App\Models\RequestPauseLine;
 // use App\Models\LineRequest;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\RequestsExport;
 
 class RequestController extends Controller
 
@@ -92,14 +94,48 @@ public function stopLineRequests(HttpRequest $request)
     {
         //
     }
+public function createChangeDate(Line $line)
+{
+    return view('admin.requests.create-change-date', compact('line'));
+}
+
+public function storeChangeDate(HttpRequest $request)
+{
+    $validated = $request->validate([
+        'line_id'      => 'required|exists:lines,id',
+        'new_date'     => 'required|date|after:1900-01-01',
+        'reason'       => 'nullable|string|max:255',
+    ]);
+
+    $line = Line::findOrFail($validated['line_id']);
+
+    // إنشاء الطلب الأساسي
+    $requestModel = \App\Models\Request::create([
+        'line_id'      => $line->id,
+        'customer_id'  => $line->customer_id,
+        'request_type' => 'change_date',
+        'status'       => 'pending',
+        'requested_by' => auth()->id(),
+    ]);
+
+    // حفظ التفاصيل
+    \App\Models\RequestChangeDate::create([
+        'request_id'   => $requestModel->id,
+        'current_date' => $line->last_invoice_date,
+        'new_date'     => $validated['new_date'],
+        'reason'       => $validated['reason'],
+    ]);
+
+    return redirect()->route('requests.stop-lines')->with('success', '✅ تم إنشاء طلب تغيير التاريخ بنجاح');
+}
 
     /**
      * Display the specified resource.
      */
-    public function show(HttpRequest $request)
-    {
-        //
-    }
+    // public function show(HttpRequest $request)
+    // {
+    //     //
+    // }
 
     /**
      * Show the form for editing the specified resource.
@@ -425,5 +461,156 @@ public function storeResume(HttpRequest $request)
     ]);
 
     return redirect()->route('requests.stop-lines')->with('success', '✅ تم إنشاء طلب إعادة التشغيل بنجاح.');
+}
+
+
+
+public function createChangeDistributor(Line $line)
+{
+    return view('admin.requests.create-change-distributor', compact('line'));
+}
+
+public function storeChangeDistributor(HttpRequest $request)
+{
+    $validated = $request->validate([
+        'line_id'         => 'required|exists:lines,id',
+        'new_distributor' => 'required|string|max:255',
+        'reason'          => 'nullable|string|max:1000',
+    ]);
+
+    $line = Line::findOrFail($validated['line_id']);
+
+    $requestModel = RequestModel::create([
+        'line_id'      => $line->id,
+        'customer_id'  => $line->customer_id,
+        'request_type' => 'change_distributor',
+        'status'       => 'pending',
+        'requested_by' => auth()->id(),
+    ]);
+
+    RequestChangeDistributor::create([
+        'request_id'      => $requestModel->id,
+        'old_distributor' => $line->distributor,
+        'new_distributor' => $validated['new_distributor'],
+        'reason'          => $validated['reason'],
+    ]);
+
+    return redirect()->route('requests.stop-lines')->with('success', '✅ تم إنشاء طلب تغيير الموزع بنجاح');
+}
+public function all(HttpRequest $request)
+{
+    $query = \App\Models\Request::with('line.customer');
+
+    // فلترة بالرقم
+    if ($request->filled('phone')) {
+        $query->whereHas('line', fn($q) => $q->where('phone_number', 'like', "%{$request->phone}%"));
+    }
+
+    // فلترة بالرقم القومي
+    if ($request->filled('nid')) {
+        $query->whereHas('line.customer', fn($q) => $q->where('national_id', 'like', "%{$request->nid}%"));
+    }
+
+    // فلترة بالنوع
+    if ($request->filled('type')) {
+        $query->where('request_type', $request->type);
+    }
+
+    // فلترة بالتاريخ
+    if ($request->filled('from')) {
+        $query->whereDate('created_at', '>=', $request->from);
+    }
+    if ($request->filled('to')) {
+        $query->whereDate('created_at', '<=', $request->to);
+    }
+
+    // فلترة بالمشغل
+    if ($request->filled('provider')) {
+        $query->whereHas('line', fn($q) => $q->where('provider', 'like', "%{$request->provider}%"));
+    }
+
+    $requests = $query->latest()->paginate(20);
+
+    return view('admin.requests.all', compact('requests'));
+}
+
+public function bulkUpdate(HttpRequest $request)
+{
+    $request->validate([
+        'selected_requests' => 'required|array',
+        'status' => 'required|in:pending,inprogress,done,cancelled',
+    ]);
+
+    \App\Models\Request::whereIn('id', $request->selected_requests)
+        ->update([
+            'status' => $request->status,
+            'done_by' => auth()->id(),
+        ]);
+
+    return back()->with('success', '✅ تم تحديث حالة الطلبات المحددة بنجاح.');
+}
+
+public function bulkAction(HttpRequest $request)
+{
+    $request->validate([
+        'selected_requests' => 'required|array',
+        'selected_requests.*' => 'exists:requests,id',
+        'new_status' => 'nullable|in:pending,inprogress,done,cancelled',
+        'action' => 'required|in:change_status,export,change_and_export',
+    ]);
+
+    $requests = \App\Models\Request::whereIn('id', $request->selected_requests)->get();
+
+    if ($request->action === 'change_status' || $request->action === 'change_and_export') {
+        foreach ($requests as $r) {
+            $r->update([
+                'status' => $request->new_status,
+                'done_by' => auth()->id()
+            ]);
+        }
+    }
+
+    if ($request->action === 'export' || $request->action === 'change_and_export') {
+        return Excel::download(new RequestsExport($requests), 'selected_requests.xlsx');
+    }
+
+    return back()->with('success', '✅ تم تنفيذ العملية بنجاح.');
+}
+
+public function show(RequestModel $request)
+{
+    $request->load([
+        'line.customer',
+        'requestedBy',
+        'doneBy',
+        'stopDetails',
+        'resellDetails',
+        'changeChip',
+        'pause',
+        'resume',
+        'changePlan',
+        'changeDistributor',
+        'changeDate',
+    ]);
+
+    return view('admin.requests.show', compact('request'));
+}
+
+public function summary()
+{
+    $counts = [
+        'stop'               => RequestModel::where('request_type', 'stop')->count(),
+        'resell'             => RequestModel::where('request_type', 'resell')->count(),
+        'change_plan'        => RequestModel::where('request_type', 'change_plan')->count(),
+        'change_chip'        => RequestModel::where('request_type', 'change_chip')->count(),
+        'pause'              => RequestModel::where('request_type', 'pause')->count(),
+        'resume'             => RequestModel::where('request_type', 'resume')->count(),
+        'change_date'        => RequestModel::where('request_type', 'change_date')->count(),
+        'change_distributor' => RequestModel::where('request_type', 'change_distributor')->count(),
+    ];
+
+    $lines = Line::select('id', 'phone_number')->latest()->take(10)->get(); // لاستخدامها للاختيار
+
+    return view('admin.requests.summary', compact('counts', 'lines'));
 }
 }

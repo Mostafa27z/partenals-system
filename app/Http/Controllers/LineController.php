@@ -361,8 +361,43 @@ public function show(Line $line)
         return [
             '010' => 'Orange',
             '011' => 'Etisalat',
-            '012' => 'WE',
-            '015' => 'Vodafone',
+            '015' => 'WE',
+            '012' => 'Vodafone',
         ];
     }
+    public function forSaleList()
+{
+      // ->whereNull('deleted_at')
+    $lines = Line::with('customer')
+        ->latest()
+        ->take(50)
+        ->get();
+
+    return view('admin.lines.for-sale', compact('lines'));
+}
+
+public function markForSale(Request $request)
+{
+    foreach ($request->input('lines', []) as $lineId => $data) {
+        $line = Line::find($lineId);
+
+        if (!$line) continue;
+
+        $isSelected = isset($data['selected']);
+
+        $line->for_sale = $isSelected;
+
+        if ($isSelected) {
+            $line->sale_price = $data['sale_price'] ?? null;
+        } else {
+            $line->sale_price = null;
+        }
+
+        $line->save();
+    }
+
+    return back()->with('success', '✅ تم تحديث حالة البيع للخطوط بنجاح.');
+}
+
+
 }

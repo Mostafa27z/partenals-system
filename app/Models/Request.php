@@ -44,4 +44,25 @@ public function changeChip()
 {
     return $this->hasOne(RequestChangeChip::class);
 }
+public function pause()
+{
+    return $this->hasOne(RequestPauseLine::class);
+}
+public function resume()
+{
+    return $this->hasOne(RequestResumeLine::class);
+}
+public function changePlan()
+{
+    return $this->hasOne(RequestChangePlan::class);
+}
+public function changeDistributor()
+{
+    return $this->hasOne(RequestChangeDistributor::class);
+}
+
+public function changeDate()
+{
+    return $this->hasOne(RequestChangeDate::class);
+}
 }

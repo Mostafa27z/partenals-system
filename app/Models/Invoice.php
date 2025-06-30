@@ -5,10 +5,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Traits\LogsChanges;
 class Invoice extends Model
 {
     use HasFactory;
+use LogsChanges;
 
     protected $fillable = [
         'line_id', 'amount', 'is_paid', 'invoice_month', 'payment_date', 'paid_by', 'notes'

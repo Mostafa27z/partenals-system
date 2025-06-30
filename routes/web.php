@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerController;
 // use App\Http\Controllers\LineController;
 use App\Http\Controllers\PlanController;
-// use App\Http\Controllers\UserController;
+use App\Http\Controllers\ChangeLogController;
 use App\Http\Controllers\LineController;
 use App\Http\Controllers\RequestController;
 
@@ -121,6 +121,9 @@ Route::get('/requests/stop-lines', [RequestController::class, 'stopLineRequests'
 });
 
 Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/requests/all', [RequestController::class, 'all'])->name('requests.all');
+    Route::get('/requests/summary', [RequestController::class, 'summary'])->name('requests.summary');
+    Route::get('/requests/{request}', [RequestController::class, 'show'])->name('requests.show');
     Route::get('/requests/resell/choose-line', [RequestController::class, 'chooseLineForResell'])->name('requests.resell.choose-line');
     Route::get('/requests/resell/{line}', [RequestController::class, 'createResell'])->name('requests.resell.create');
     Route::post('/requests/resell/store', [RequestController::class, 'storeResell'])->name('requests.resell.store');
@@ -134,6 +137,17 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::post('/requests/pause/store', [RequestController::class, 'storePause'])->name('requests.pause.store');
     Route::get('/requests/resume/{line}/create', [RequestController::class, 'createResume'])->name('requests.resume.create');
     Route::post('/requests/resume/store', [RequestController::class, 'storeResume'])->name('requests.resume.store');
+    Route::get('/requests/change-date/{line}', [RequestController::class, 'createChangeDate'])->name('requests.change-date.create');
+    Route::post('/requests/change-date/store', [RequestController::class, 'storeChangeDate'])->name('requests.change-date.store');
+    Route::get('/requests/change-distributor/{line}', [RequestController::class, 'createChangeDistributor'])->name('requests.change-distributor.create');
+    Route::post('/requests/change-distributor/store', [RequestController::class, 'storeChangeDistributor'])->name('requests.change-distributor.store');
+    Route::put('/requests/bulk-update', [RequestController::class, 'bulkUpdate'])->name('requests.bulk-update');
+    Route::post('/requests/bulk-action', [RequestController::class, 'bulkAction'])->name('requests.bulk-action');
+    Route::get('/change-logs', [ChangeLogController::class, 'index'])->name('change-logs.index'); 
+    Route::get('/lines/for-sale', [LineController::class, 'forSaleList'])->name('lines.for-sale');
+    Route::post('/lines/mark-for-sale', [LineController::class, 'markForSale'])->name('lines.mark-for-sale');
+
+
 
 });
 require __DIR__.'/auth.php';

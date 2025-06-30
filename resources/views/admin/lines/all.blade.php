@@ -1,7 +1,15 @@
 <x-app-layout>
-    <x-slot name="header">
+    <x-slot name="header"> 
+    <div class="flex justify-between items-center">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">جميع الخطوط</h2>
-    </x-slot>
+
+        <a href="{{ route('lines.for-sale') }}" 
+           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-sm">
+            📦 خطوط للبيع
+        </a>
+    </div>
+</x-slot>
+
 
     <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8" dir="rtl">
         @if(session('success'))

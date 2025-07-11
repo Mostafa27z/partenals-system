@@ -1,6 +1,11 @@
 <x-app-layout> 
     <x-slot name="header"> 
+        <div class="flex justify-between items-center">
         <h2 class="text-xl font-semibold">إدارة الأنظمة</h2> 
+        <a href="{{ route('plans.trashed') }}" class="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700">
+    🗑️ الانظمة المحذوفة
+</a>
+        </div>
     </x-slot> 
  
     <div class="py-4 px-6"> 

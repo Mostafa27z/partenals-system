@@ -20,89 +20,81 @@ class InvoiceController extends Controller
         return view('admin.invoices.create', compact('line'));
     }
 
-   public function store(Request $request, Line $line) 
-{ 
-    $request->validate([ 
-        'months_count' => 'required|integer|min:1', 
-    ]); 
+   public function store(Request $request, Line $line)
+{
+    $request->validate([
+        'months_count' => 'required|integer|min:1',
+    ]);
 
-    $planPrice = optional($line->plan)->price ?? 0; 
-    $months = $request->months_count; 
+    $planPrice = optional($line->plan)->price ?? 0;
+    $months = $request->months_count;
 
-    $startDate = $line->last_invoice_date 
-        ? Carbon::parse($line->last_invoice_date)->addMonth()->startOfMonth() 
-        : now()->startOfMonth(); 
+    // نأخذ اليوم من التاريخ الأخير أو اليوم الحالي
+    $baseDate = $line->last_invoice_date
+        ? Carbon::parse($line->last_invoice_date)->copy()->addMonth()
+        : now();
 
-    $lastInvoiceMonth = null; 
+    $day = $baseDate->day;
+    $lastInvoiceMonth = null;
 
-    for ($i = 0; $i < $months; $i++) { 
-        $monthDate = $startDate->copy()->addMonths($i); 
+    for ($i = 0; $i < $months; $i++) {
+        $invoiceDate = $baseDate->copy()->addMonths($i)->setDay($day);
 
-        Invoice::create([ 
-            'line_id'       => $line->id, 
-            'amount'        => $planPrice, 
-            'invoice_month' => $monthDate, 
-            'is_paid'       => true, 
-            'payment_date'  => now(), 
-            'paid_by'       => Auth::id(), 
-            'notes'         => $request->notes, 
-        ]); 
+        // لو اليوم غير صالح في هذا الشهر (مثلاً 31 فبراير)، يتم تصحيحه لآخر يوم متاح
+        if (!$invoiceDate->isValid()) {
+            $invoiceDate->day = $invoiceDate->daysInMonth;
+        }
 
-        $lastInvoiceMonth = $monthDate; 
-    } 
+        Invoice::create([
+            'line_id'       => $line->id,
+            'amount'        => $planPrice,
+            'invoice_month' => $invoiceDate,
+            'is_paid'       => true,
+            'payment_date'  => now(),
+            'paid_by'       => Auth::id(),
+            'notes'         => $request->notes,
+        ]);
 
-    // تحديث تاريخ آخر فاتورة
-    if ($lastInvoiceMonth) { 
-        $line->update([ 
-            'last_invoice_date' => $lastInvoiceMonth, 
-        ]); 
-    } 
+        $lastInvoiceMonth = $invoiceDate;
+    }
 
-    // ✅ إنشاء طلب إعادة تشغيل إذا كانت الشروط مناسبة
+    if ($lastInvoiceMonth) {
+        $line->update([
+            'last_invoice_date' => $lastInvoiceMonth,
+        ]);
+    }
+
+    // إعادة التشغيل إن تم دفع فاتورة مستقبلية
     $resumeExists = \App\Models\Request::where('line_id', $line->id)
-    ->where('request_type', 'resume')
-    ->whereDate('created_at', now()->toDateString())
-    ->exists();
-//     Log::debug('Resume auto request check', [
-//     'line_status'        => $line->status,
-//     'last_invoice_date'  => $lastInvoiceMonth?->toDateString(),
-//     'now'                => now()->toDateString(),
-//     'should_create'      => $line->status === 'inactive' && $lastInvoiceMonth?->greaterThan(now()),
-// ]);
+        ->where('request_type', 'resume')
+        ->whereDate('created_at', now()->toDateString())
+        ->exists();
 
     if (
-    $line->status === 'inactive' &&
-    $lastInvoiceMonth &&
-    $lastInvoiceMonth->greaterThan(now()) &&
-    !$resumeExists
-) {
+        $line->status === 'inactive' &&
+        $lastInvoiceMonth &&
+        $lastInvoiceMonth->greaterThan(now()) &&
+        !$resumeExists
+    ) {
+        $resumeRequest = \App\Models\Request::create([
+            'line_id'      => $line->id,
+            'customer_id'  => $line->customer_id,
+            'request_type' => 'resume',
+            'status'       => 'pending',
+            'requested_by' => Auth::id(),
+        ]);
 
-    $resumeRequest = \App\Models\Request::create([
-        'line_id'      => $line->id,
-        'customer_id'  => $line->customer_id,
-        'request_type' => 'resume',
-        'status'       => 'pending',
-        'requested_by' => Auth::id(),
-    ]);
-
-    $resumeDetails = \App\Models\RequestResumeLine::create([
-        'request_id'   => $resumeRequest->id,
-        'reason'       => 'تم دفع الفاتورة',
-        'comment'      => 'تم إنشاء الطلب بواسطة النظام تلقائياً',
-    ]);
-
-    // dd([
-    //     'line_status'        => $line->status,
-    //     'last_invoice_date'  => $lastInvoiceMonth,
-    //     'now'                => now(),
-    //     'resume_request'     => $resumeRequest,
-    //     'resume_request_det' => $resumeDetails,
-    // ]);
-}
+        \App\Models\RequestResumeLine::create([
+            'request_id' => $resumeRequest->id,
+            'reason'     => 'تم دفع الفاتورة',
+            'comment'    => 'تم إنشاء الطلب بواسطة النظام تلقائياً',
+        ]);
+    }
 
     return redirect()->route('invoices.index', ['line' => $line->id])
                      ->with('success', '✅ تم دفع الفواتير بنجاح.');
 }
+
 
 public function index(Request $request)
 {

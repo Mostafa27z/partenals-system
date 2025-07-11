@@ -6,8 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\LogsChanges;
+use Illuminate\Database\Eloquent\SoftDeletes;
 class Line extends Model
 {
+    
+
+
+    
+    use SoftDeletes;
+
     use HasFactory;
     use LogsChanges;
 
@@ -30,7 +37,7 @@ class Line extends Model
         'notes',
         'added_by',
         'distributor',
-        'attached_at','for_sale', 'sale_price',
+        'attached_at','for_sale', 'sale_price','deleted_at'
     ];
 // protected $dates = ['attached_at'];
 // أو في Laravel 10+ يمكن استخدام:

@@ -19,9 +19,9 @@
             </div>
 
             <div>
-    <label class="block font-medium">مشغل الخدمة (GCode)</label>
+    <label class="block font-medium">مشغل الخدمة </label>
     <select name="provider" class="w-full border rounded px-3 py-2">
-        @foreach(['010', '011', '012', '015'] as $code)
+        @foreach(['Vodafone', 'Etisalat', 'Orange', 'We'] as $code)
             <option value="{{ $code }}" {{ old('provider', $plan->provider) == $code ? 'selected' : '' }}>
                 {{ $code }}
             </option>

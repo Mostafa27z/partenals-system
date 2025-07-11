@@ -12,16 +12,38 @@ class PlanController extends Controller
         $plans = Plan::query();
 
         if ($request->filled('search')) {
-            $plans->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('provider', 'like', "%{$request->search}%")
-                  ->orWhere('plan_code', 'like', "%{$request->search}%")
-                  ->orWhere('type', 'like', "%{$request->search}%");
+            $plans->where(function ($q) use ($request) {
+                $q->where('name', 'like', "%{$request->search}%")
+                ->orWhere('provider', 'like', "%{$request->search}%")
+                ->orWhere('plan_code', 'like', "%{$request->search}%")
+                ->orWhere('type', 'like', "%{$request->search}%");
+            });
+
         }
 
         $plans = $plans->paginate(10);
 
         return view('admin.plans.index', compact('plans'));
     }
+public function trashed()
+{
+    $plans = Plan::onlyTrashed()->paginate(10);
+    return view('admin.plans.trashed', compact('plans'));
+}
+public function restore($id)
+{
+    $plan = Plan::onlyTrashed()->findOrFail($id);
+    $plan->restore();
+
+    return redirect()->route('plans.trashed')->with('success', 'تم استعادة النظام بنجاح');
+}
+public function forceDelete($id)
+{
+    $plan = Plan::onlyTrashed()->findOrFail($id);
+    $plan->forceDelete();
+
+    return redirect()->route('plans.trashed')->with('success', 'تم حذف النظام نهائيًا');
+}
 
     public function export()
     {

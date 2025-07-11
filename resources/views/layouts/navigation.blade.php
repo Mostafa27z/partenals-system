@@ -65,6 +65,11 @@
                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📄 كل الطلبات</a>
             <a href="{{ route('requests.summary') }}"
                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📊 ملخص الطلبات</a>
+               <a href="{{ route('requests.history') }}"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                🕓 تاريخ الطلبات
+                </a>
+
         </div>
     </div>
 </div>

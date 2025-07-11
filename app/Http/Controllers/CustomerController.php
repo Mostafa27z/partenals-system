@@ -147,5 +147,26 @@ public function searchByNationalId(Request $request)
         ->limit(20)
         ->get();
 }
+public function trashed()
+{
+    $customers = Customer::onlyTrashed()->with('lines')->paginate(20);
+    return view('admin.customers.trashed', compact('customers'));
+}
+
+public function restore($id)
+{
+    $customer = Customer::onlyTrashed()->findOrFail($id);
+    $customer->restore();
+
+    return redirect()->route('customers.trashed')->with('success', '✅ تم استرجاع العميل بنجاح');
+}
+
+public function forceDelete($id)
+{
+    $customer = Customer::onlyTrashed()->findOrFail($id);
+    $customer->forceDelete();
+
+    return redirect()->route('customers.trashed')->with('success', '🗑️ تم حذف العميل نهائياً');
+}
 
 }

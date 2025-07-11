@@ -19,17 +19,36 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($logs as $log)
-                            <tr>
-                                <td class="px-4 py-2 border">{{ class_basename($log->model_type) }}</td>
-                                <td class="px-4 py-2 border">{{ $log->model_id }}</td>
-                                <td class="px-4 py-2 border">{{ $log->field_name }}</td>
-                                <td class="px-4 py-2 border text-red-700">{{ $log->old_value }}</td>
-                                <td class="px-4 py-2 border text-green-700">{{ $log->new_value }}</td>
-                                <td class="px-4 py-2 border">{{ $log->user?->name ?? 'System' }}</td>
-                                <td class="px-4 py-2 border">{{ $log->created_at->format('Y-m-d H:i') }}</td>
-                            </tr>
-                        @endforeach
+                       @foreach ($logs as $log)
+    <tr> 
+        <td class="px-4 py-2 border">
+            @if (class_basename($log->model_type) === 'Customer')
+                عميل
+            @elseif (class_basename($log->model_type) === 'Line')
+                خط
+            @else
+                {{ class_basename($log->model_type) }}
+            @endif
+        </td> 
+
+        <td class="px-4 py-2 border">
+            @if (class_basename($log->model_type) === 'Customer' && $log->model)
+                {{ $log->model->national_id ?? '---' }}
+            @elseif (class_basename($log->model_type) === 'Line' && $log->model)
+                {{ $log->model->phone_number ?? '---' }}
+            @else
+                {{ $log->model_id }}
+            @endif
+        </td>
+
+        <td class="px-4 py-2 border">{{ $log->field_name }}</td> 
+        <td class="px-4 py-2 border text-red-700">{{ $log->old_value }}</td> 
+        <td class="px-4 py-2 border text-green-700">{{ $log->new_value }}</td> 
+        <td class="px-4 py-2 border">{{ $log->user?->name ?? 'System' }}</td> 
+        <td class="px-4 py-2 border">{{ $log->created_at->format('Y-m-d H:i') }}</td> 
+    </tr> 
+@endforeach
+
                     </tbody>
                 </table>
 

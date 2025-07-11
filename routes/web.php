@@ -9,7 +9,7 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ChangeLogController;
 use App\Http\Controllers\LineController;
 use App\Http\Controllers\RequestController;
-
+use App\Http\Controllers\InvoiceController;
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/permissions', [PermissionController::class, 'index'])->name('permissions.index');
     Route::post('/admin/permissions/update', [PermissionController::class, 'update'])->name('permissions.update');
@@ -54,13 +54,23 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 // use App\Http\Controllers\PlanController;
 
 Route::prefix('admin')->middleware(['auth'])->group(function () {
-    Route::resource('plans', PlanController::class);
+    // resource + export
+    
     Route::get('plans-export', [PlanController::class, 'export'])->name('plans.export');
+
+    // ✅ لا تكرر prefix('plans') لأنه بالفعل داخل plans resource
+    Route::get('/plans/trashed', [PlanController::class, 'trashed'])->name('plans.trashed');
+    Route::post('/plans/{id}/restore', [PlanController::class, 'restore'])->name('plans.restore');
+    Route::delete('/plans/{id}/force-delete', [PlanController::class, 'forceDelete'])->name('plans.force-delete');
+    Route::resource('plans', PlanController::class);
 });
-use App\Http\Controllers\InvoiceController;
+
+
 Route::prefix('admin/lines')->middleware('auth')->group(function () {
     Route::get('import', [LineController::class, 'importForm'])->name('lines.import.form');
     Route::post('import', [LineController::class, 'importProcess'])->name('lines.import.process');
+    Route::post('/export-selected', [LineController::class, 'exportSelected'])->name('lines.export.selected');
+
 });
 Route::middleware(['auth'])->group(function () {
 // routes/web.php
@@ -101,20 +111,49 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::put('{line}', [LineController::class, 'updateStandalone'])->name('update'); // ✅ هنا
     Route::delete('{line}', [LineController::class, 'destroyStandalone'])->name('destroy');
     Route::get('{line}/invoices', [InvoiceController::class, 'lineInvoices'])->name('invoices');
+    // سلة المحذوفات
+Route::get('/trashed', [LineController::class, 'trashed'])->name('trashed');
+
+// استرجاع خط
+Route::post('/{id}/restore', [LineController::class, 'restore'])->name('restore');
+
+// حذف نهائي
+Route::delete('/{id}/force-delete', [LineController::class, 'forceDelete'])->name('forceDelete');
 });
 // search
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     // كل الراوتس دي لازم تبقى هنا:
     Route::get('/ajax/customers/search', [CustomerController::class, 'searchByNationalId'])->name('ajax.customers.search');
 
-    
+    // العملاء المحذوفين مؤقتاً
+Route::get('/customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
+
+// استرجاع عميل
+Route::post('/customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
+
+// حذف نهائي
+Route::delete('/customers/{id}/force-delete', [CustomerController::class, 'forceDelete'])->name('customers.forceDelete');
+
 });
 
 Route::get('/requests/stop-lines', [RequestController::class, 'stopLineRequests'])->name('requests.stop-lines');
+Route::post('/requests/stop/import', [RequestController::class, 'importStopRequests'])->name('requests.stop.import');
+Route::post('/requests/resell/import', [RequestController::class, 'importResellRequests'])->name('requests.resell.import');
+Route::post('/requests/change-plan/import', [RequestController::class, 'importChangePlanRequests'])->name('requests.change-plan.import');
+Route::post('/requests/change-chip/import', [RequestController::class, 'importChangeChipRequests'])->name('requests.change-chip.import');
+Route::post('/requests/change-distributor/import', [RequestController::class, 'importChangeDistributorRequests'])->name('requests.change-distributor.import');
+Route::post('/requests/change-date/import', [RequestController::class, 'importChangeDateRequests'])->name('requests.change-date.import');
+Route::post('/requests/resume/import', [RequestController::class, 'importResumeRequests'])->name('requests.resume.import');
+Route::post('/requests/pause/import', [RequestController::class, 'importPauseRequests'])->name('requests.pause.import');
+
     Route::get('/requests/resell/{line}/create', [RequestController::class, 'createResell'])->name('requests.resell.create');
     Route::post('/requests/resell/store', [RequestController::class, 'storeResell'])->name('requests.resell.store');
     Route::get('/requests/resell/choose-line', [RequestController::class, 'chooseLineForResell'])->name('requests.resell.choose-line');
     Route::put('/requests/{request}', [RequestController::class, 'updateStatus'])->name('requests.update-status');
+// routes/web.php (أو admin.php إذا عندك group)
+Route::get('/requests/stop/{line}', [RequestController::class, 'createStop'])->name('requests.stop.create');
+Route::post('/requests/stop/store', [RequestController::class, 'storeStop'])->name('requests.stop.store');
+Route::get('/requests/history', [RequestController::class, 'history'])->name('requests.history');
 
 // // web.php
  Route::get('/ajax/customers/search', [CustomerController::class, 'searchByNationalId'])->name('ajax.customers.search');
@@ -146,6 +185,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/change-logs', [ChangeLogController::class, 'index'])->name('change-logs.index'); 
     Route::get('/lines/for-sale', [LineController::class, 'forSaleList'])->name('lines.for-sale');
     Route::post('/lines/mark-for-sale', [LineController::class, 'markForSale'])->name('lines.mark-for-sale');
+Route::get('/ajax/customer-by-nid', function (\Illuminate\Http\Request $request) {
+    $nid = $request->q;
+    $customer = \App\Models\Customer::where('national_id', $nid)->first();
+
+    return $customer ? response()->json($customer) : response()->json(null, 404);
+});
 
 
 

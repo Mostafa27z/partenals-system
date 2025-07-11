@@ -83,28 +83,28 @@
                 const value = typeSelect.value;
 
                 if (value === 'chip') {
-                    newSerialGroup.style.display = '';
+                    // newSerialGroup.style.display = '';
                     newSerialInput.required = true;
 
-                    fullNameGroup.style.display = 'none';
-                    nationalIdGroup.style.display = 'none';
+                    // fullNameGroup.style.display = 'none';
+                    // nationalIdGroup.style.display = 'none';
                     document.getElementById('full_name').required = false;
                     document.getElementById('national_id').required = false;
 
                 } else if (value === 'branch') {
-                    newSerialGroup.style.display = '';
+                    // newSerialGroup.style.display = '';
                     newSerialInput.required = false;
 
-                    fullNameGroup.style.display = '';
-                    nationalIdGroup.style.display = '';
+                    // fullNameGroup.style.display = '';
+                    // nationalIdGroup.style.display = '';
                     document.getElementById('full_name').required = false;
                     document.getElementById('national_id').required = false;
 
                 } else {
                     // Reset all
-                    newSerialGroup.style.display = '';
-                    fullNameGroup.style.display = '';
-                    nationalIdGroup.style.display = '';
+                    // newSerialGroup.style.display = '';
+                    // fullNameGroup.style.display = '';
+                    // nationalIdGroup.style.display = '';
                 }
             }
 

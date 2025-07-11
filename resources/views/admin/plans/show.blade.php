@@ -1,17 +1,24 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold">تفاصيل النظام</h2>
+        <h2 class="text-xl font-semibold text-gray-800">{{ __('messages.Plan Details') }}</h2>
     </x-slot>
 
-    <div class="py-4 px-6 space-y-2 text-right" dir="rtl">
-        <p><strong>الاسم:</strong> {{ $plan->name }}</p>
-        <p><strong>السعر:</strong> {{ $plan->price }}</p>
-        <p><strong>مشغل الخدمة:</strong> {{ $plan->provider }}</p>
-        <p><strong>سعر المشغل:</strong> {{ $plan->provider_price }}</p>
-        <p><strong>النوع:</strong> {{ $plan->type }}</p>
-        <p><strong>ID:</strong> {{ $plan->plan_code }}</p>
-        <p><strong>وصف النظام:</strong> {{ $plan->penalty }}</p>
+    <div class="py-6 px-6 md:px-10 max-w-3xl mx-auto bg-white shadow rounded" dir="rtl">
+        <div class="space-y-4 text-right text-gray-800 leading-relaxed">
+            <p><strong>{{ __('messages.Name') }}:</strong> {{ $plan->name }}</p>
+            <p><strong>{{ __('messages.Price') }}:</strong> {{ $plan->price }} {{ __('messages.EGP') }}</p>
+            <p><strong>{{ __('messages.Provider') }}:</strong> {{ $plan->provider }}</p>
+            <p><strong>{{ __('messages.Provider Price') }}:</strong> {{ $plan->provider_price }} {{ __('messages.EGP') }}</p>
+            <p><strong>{{ __('messages.Type') }}:</strong> {{ $plan->type }}</p>
+            <p><strong>{{ __('messages.Plan Code') }}:</strong> {{ $plan->plan_code }}</p>
+            <p><strong>{{ __('messages.Description') }}:</strong> {{ $plan->penalty }}</p>
+        </div>
 
-        <a href="{{ route('plans.edit', $plan->id) }}" class="text-blue-500">تعديل</a>
+        <div class="mt-6 flex justify-end">
+            <a href="{{ route('plans.edit', $plan->id) }}"
+               class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                {{ __('messages.Edit') }}
+            </a>
+        </div>
     </div>
 </x-app-layout>

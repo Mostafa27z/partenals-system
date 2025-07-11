@@ -1,6 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-bold text-gray-800">🗑️ العملاء المحذوفين مؤقتاً</h2>
+        <h2 class="text-xl font-bold text-gray-800">
+            🗑️ {{ __('messages.Deleted Customers') }}
+        </h2>
     </x-slot>
 
     <div class="py-6 max-w-6xl mx-auto sm:px-6 lg:px-8">
@@ -10,37 +12,49 @@
             </div>
         @endif
 
-        <div class="bg-white shadow rounded p-4">
-            <table class="min-w-full table-auto text-center">
-                <thead class="bg-gray-100">
+        <div class="bg-white shadow rounded p-4 overflow-x-auto">
+            <table class="min-w-full table-auto text-sm text-center divide-y divide-gray-200">
+                <thead class="bg-gray-100 text-gray-700">
                     <tr>
-                        <th>الاسم</th>
-                        <th>الرقم القومي</th>
-                        <th>تاريخ الحذف</th>
-                        <th>العمليات</th>
+                        <th class="px-4 py-2">{{ __('messages.Full Name') }}</th>
+                        <th class="px-4 py-2">{{ __('messages.National ID') }}</th>
+                        <th class="px-4 py-2">{{ __('messages.Deleted At') }}</th>
+                        <th class="px-4 py-2">{{ __('messages.Actions') }}</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-white divide-y divide-gray-100">
                     @forelse($customers as $customer)
                         <tr>
-                            <td>{{ $customer->full_name }}</td>
-                            <td>{{ $customer->national_id }}</td>
-                            <td>{{ $customer->deleted_at->format('Y-m-d H:i') }}</td>
-                            <td class="flex justify-center gap-4 mt-2">
-                                <form action="{{ route('customers.restore', $customer->id) }}" method="POST">
-                                    @csrf
-                                    <button class="text-green-600 hover:underline">♻️ استرجاع</button>
-                                </form>
+                            <td class="px-4 py-2">{{ $customer->full_name }}</td>
+                            <td class="px-4 py-2">{{ $customer->national_id }}</td>
+                            <td class="px-4 py-2">{{ $customer->deleted_at->format('Y-m-d H:i') }}</td>
+                            <td class="px-4 py-2">
+                                <div class="flex justify-center gap-3">
+                                    <form action="{{ route('customers.restore', $customer->id) }}" method="POST">
+                                        @csrf
+                                        <button class="text-green-600 hover:underline" title="{{ __('messages.Restore') }}">
+                                            ♻️ {{ __('messages.Restore') }}
+                                        </button>
+                                    </form>
 
-                                <form action="{{ route('customers.forceDelete', $customer->id) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="text-red-600 hover:underline" onclick="return confirm('❌ هل تريد حذف العميل نهائيًا؟')">🗑️ حذف نهائي</button>
-                                </form>
+                                    <form action="{{ route('customers.forceDelete', $customer->id) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-red-600 hover:underline"
+                                            onclick="return confirm('{{ __('messages.Confirm Permanent Deletion') }}')"
+                                            title="{{ __('messages.Force Delete') }}">
+                                            🗑️ {{ __('messages.Force Delete') }}
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="text-gray-500">لا يوجد عملاء محذوفين</td></tr>
+                        <tr>
+                            <td colspan="4" class="py-4 text-gray-500">
+                                {{ __('messages.No Deleted Customers') }}
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>

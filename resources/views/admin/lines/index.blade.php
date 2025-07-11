@@ -1,57 +1,68 @@
-<!-- resources/views/admin/lines/index.blade.php -->
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            الخطوط التابعة للعميل: {{ $customer->full_name }}
-        </h2>
-    </x-slot>
-
-    <div class="py-6 max-w-6xl mx-auto sm:px-6 lg:px-8">
-        <div class="mb-4">
-            <a href="{{ route('customers.lines.create', $customer) }}" class="btn btn-success">+ إضافة خط جديد</a>
-        </div>
-
-        <div class="bg-white p-6 rounded shadow">
-            @if ($customer->lines->count())
-                <table class="min-w-full divide-y divide-gray-200 text-center">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="px-4 py-2">رقم الهاتف</th>
-                            <th class="px-4 py-2">نوع الخط</th>
-                            <th class="px-4 py-2">المزود</th>
-                            <th class="px-4 py-2">النظام</th>
-                            <th class="px-4 py-2">الحالة</th>
-                            
-                            <th class="px-4 py-2">تاريخ الدفع</th>
-                            <th class="px-4 py-2">العمليات</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($customer->lines as $line)
-                            <tr>
-                                <td class="px-4 py-2">{{ $line->phone_number }}</td>
-                                <td class="px-4 py-2">{{ $line->line_type == 'prepaid' ? 'مدفوع مسبقاً' : 'فاتورة' }}</td>
-                                <td class="px-4 py-2">{{ $line->provider }}</td>
-                                <td class="px-4 py-2">{{ $line->plan->name ?? '-' }}</td>
-                                <td class="px-4 py-2">
-                                    {{ $line->status === 'active' ? 'نشط' : 'غير نشط' }}
-                                </td>
-                                <td class="px-4 py-2">{{ $line->payment_date }}</td>
-                                <td class="px-4 py-2">
-                                    <a href="{{ route('customers.lines.edit', [$customer, $line]) }}" class="text-blue-500">تعديل</a> |
-                                    <form action="{{ route('customers.lines.destroy', [$customer, $line]) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button onclick="return confirm('هل تريد حذف هذا الخط؟')" class="text-red-600">حذف</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @else
-                <p class="text-gray-500">لا توجد خطوط لهذا العميل حالياً.</p>
-            @endif
-        </div>
-    </div>
+<!-- resources/views/admin/lines/index.blade.php --> 
+<x-app-layout> 
+    <x-slot name="header"> 
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight"> 
+            {{ __('messages.customer_lines_for', ['name' => $customer->full_name]) }}
+        </h2> 
+    </x-slot> 
+ 
+    <div class="py-6 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"> 
+        <div class="mb-6 text-right"> 
+            <a href="{{ route('customers.lines.create', $customer) }}" 
+               class="inline-block bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 transition">
+                + {{ __('messages.add_new_line') }}
+            </a> 
+        </div> 
+ 
+        <div class="bg-white p-6 rounded shadow overflow-x-auto"> 
+            @if ($customer->lines->count()) 
+                <table class="min-w-full divide-y divide-gray-200 text-center"> 
+                    <thead class="bg-gray-100"> 
+                        <tr> 
+                            <th class="px-4 py-2">{{ __('messages.phone_number') }}</th> 
+                            <th class="px-4 py-2">{{ __('messages.line_type') }}</th> 
+                            <th class="px-4 py-2">{{ __('messages.provider') }}</th> 
+                            <th class="px-4 py-2">{{ __('messages.plan') }}</th> 
+                            <th class="px-4 py-2">{{ __('messages.status') }}</th> 
+                            <th class="px-4 py-2">{{ __('messages.payment_date') }}</th> 
+                            <th class="px-4 py-2">{{ __('messages.actions') }}</th> 
+                        </tr> 
+                    </thead> 
+                    <tbody class="bg-white divide-y divide-gray-200"> 
+                        @foreach($customer->lines as $line) 
+                            <tr> 
+                                <td class="px-4 py-2 whitespace-nowrap">{{ $line->phone_number }}</td> 
+                                <td class="px-4 py-2 whitespace-nowrap"> 
+                                    {{ $line->line_type == 'prepaid' ? __('messages.prepaid') : __('messages.postpaid') }} 
+                                </td> 
+                                <td class="px-4 py-2 whitespace-nowrap">{{ $line->provider }}</td> 
+                                <td class="px-4 py-2 whitespace-nowrap">{{ $line->plan->name ?? '-' }}</td> 
+                                <td class="px-4 py-2 whitespace-nowrap"> 
+                                    {{ $line->status === 'active' ? __('messages.active') : __('messages.inactive') }} 
+                                </td> 
+                                <td class="px-4 py-2 whitespace-nowrap">{{ $line->payment_date }}</td> 
+                                <td class="px-4 py-2 whitespace-nowrap"> 
+                                    <a href="{{ route('customers.lines.edit', [$customer, $line]) }}" 
+                                       class="text-blue-600 hover:underline mr-2"> 
+                                        {{ __('messages.edit') }} 
+                                    </a> 
+                                    <form action="{{ route('customers.lines.destroy', [$customer, $line]) }}" method="POST" class="inline"> 
+                                        @csrf 
+                                        @method('DELETE') 
+                                        <button 
+                                            onclick="return confirm('{{ __('messages.confirm_delete_line') }}')" 
+                                            class="text-red-600 hover:underline"> 
+                                            {{ __('messages.delete') }} 
+                                        </button> 
+                                    </form> 
+                                </td> 
+                            </tr> 
+                        @endforeach 
+                    </tbody> 
+                </table> 
+            @else 
+                <p class="text-gray-500 text-center py-10">{{ __('messages.no_lines_for_customer') }}</p> 
+            @endif 
+        </div> 
+    </div> 
 </x-app-layout>

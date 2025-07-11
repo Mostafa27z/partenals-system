@@ -2,11 +2,11 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="text-xl font-semibold text-gray-800 leading-tight">
-                🗑️ الانظمة المحذوفة مؤقتًا
+                🗑️ {{ __('messages.Deleted Plans') }}
             </h2>
-
-            <a href="{{ route('plans.index') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                ⬅️ العودة للانظمة
+            <a href="{{ route('plans.index') }}"
+               class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                ⬅️ {{ __('messages.Back to Plans') }}
             </a>
         </div>
     </x-slot>
@@ -24,11 +24,11 @@
                 <table class="min-w-full divide-y divide-gray-200 text-center">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="px-4 py-2">الاسم</th>
-                            <th class="px-4 py-2">السعر</th>
-                            <th class="px-4 py-2">المزود</th>
-                            <th class="px-4 py-2">الكود</th>
-                            <th class="px-4 py-2">الإجراءات</th>
+                            <th class="px-4 py-2">{{ __('messages.Name') }}</th>
+                            <th class="px-4 py-2">{{ __('messages.Price') }}</th>
+                            <th class="px-4 py-2">{{ __('messages.Provider') }}</th>
+                            <th class="px-4 py-2">{{ __('messages.Plan Code') }}</th>
+                            <th class="px-4 py-2">{{ __('messages.Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
@@ -42,15 +42,15 @@
                                     <form action="{{ route('plans.restore', $plan->id) }}" method="POST" class="inline-block">
                                         @csrf
                                         <button type="submit" class="text-green-600 hover:underline">
-                                            🔄 استعادة
+                                            🔄 {{ __('messages.Restore') }}
                                         </button>
                                     </form>
 
-                                    <form action="{{ route('plans.force-delete', $plan->id) }}" method="POST" class="inline-block" onsubmit="return confirm('⚠️ هل أنت متأكد من حذف هذا النظام نهائيًا؟');">
+                                    <form action="{{ route('plans.force-delete', $plan->id) }}" method="POST" class="inline-block" onsubmit="return confirm('{{ __('messages.Confirm Permanent Delete') }}');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:underline">
-                                            🗑️ حذف نهائي
+                                            🗑️ {{ __('messages.Delete Permanently') }}
                                         </button>
                                     </form>
                                 </td>
@@ -65,7 +65,7 @@
             </div>
         @else
             <div class="bg-white p-6 rounded shadow text-center text-gray-500">
-                لا توجد انظمة محذوفة حاليًا.
+                {{ __('messages.No Deleted Plans') }}
             </div>
         @endif
     </div>

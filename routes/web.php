@@ -10,6 +10,23 @@ use App\Http\Controllers\ChangeLogController;
 use App\Http\Controllers\LineController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\InvoiceController;
+Route::get('/test-session', function () {
+    session(['test_key' => 'تم الحفظ']);
+    return 'Session set';
+});
+Route::get('/check-session', function () {
+    return session('test_key', 'لا توجد جلسة');
+});
+
+Route::get('lang/{locale}', function ($locale) {
+    if (! in_array($locale, ['en', 'ar'])) {
+        abort(400);
+    }
+
+    session(['locale' => $locale]);
+    return back();
+})->name('lang.switch');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/permissions', [PermissionController::class, 'index'])->name('permissions.index');
     Route::post('/admin/permissions/update', [PermissionController::class, 'update'])->name('permissions.update');
@@ -22,6 +39,13 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/home', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/ajax/plans/by-provider', function (\Illuminate\Http\Request $request) {
+    $provider = $request->q;
+    return \App\Models\Plan::where('provider', $provider)->select('id', 'name')->get();
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', function () {

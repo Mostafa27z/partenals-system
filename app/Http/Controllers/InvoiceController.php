@@ -133,41 +133,42 @@ if ($request->filled('to')) {
 }
 
 
-    public function customerInvoices(Request $request, Customer $customer)
-{
-    $query = Invoice::whereHas('line', function ($q) use ($customer) {
-        $q->where('customer_id', $customer->id);
-    });
+    public function customerInvoices(Request $request, Customer $customer) 
+{ 
+    $query = Invoice::whereHas('line', function ($q) use ($customer) { 
+        $q->where('customer_id', $customer->id); 
+    }); 
+ 
+    if ($request->filled('provider')) { 
+        $query->whereHas('line', fn($q) => $q->whereIn('provider', $request->provider)); 
+    } 
+ 
+    if ($request->filled('line_type')) { 
+        $query->whereHas('line', fn($q) => $q->whereIn('line_type', $request->line_type)); 
+    } 
+ 
+    if ($request->filled('plan_id')) { 
+        $query->whereHas('line', fn($q) => $q->whereIn('plan_id', $request->plan_id)); 
+    } 
+ 
+    if ($request->filled('is_paid')) { 
+        $query->whereIn('is_paid', $request->is_paid); 
+    } 
+ 
+    if ($request->filled('from')) { 
+        $query->whereDate('invoice_month', '>=', $request->from); 
+    } 
+ 
+    if ($request->filled('to')) { 
+        $query->whereDate('invoice_month', '<=', $request->to); 
+    } 
+ 
+    $invoices = $query->with(['line', 'user'])->latest('invoice_month')->paginate(10); 
+    $total = $query->sum('amount'); 
+    $plans = Plan::select('id', 'name')->get(); // أو فقط Plan::all()
 
-     if ($request->filled('provider')) {
-    $query->whereHas('line', fn($q) => $q->whereIn('provider', $request->provider));
+    return view('admin.invoices.customer', compact('customer', 'invoices', 'total', 'plans')); 
 }
-
-if ($request->filled('line_type')) {
-    $query->whereHas('line', fn($q) => $q->whereIn('line_type', $request->line_type));
-}
-
-if ($request->filled('plan_id')) {
-    $query->whereHas('line', fn($q) => $q->whereIn('plan_id', $request->plan_id));
-}
-
-if ($request->filled('is_paid')) {
-    $query->whereIn('is_paid', $request->is_paid);
-}
-
-if ($request->filled('from')) {
-    $query->whereDate('invoice_month', '>=', $request->from);
-}
-if ($request->filled('to')) {
-    $query->whereDate('invoice_month', '<=', $request->to);
-}
-
-    $invoices = $query->with(['line', 'user'])->latest('invoice_month')->paginate(10);
-    $total = $query->sum('amount');
-
-    return view('admin.invoices.customer', compact('customer', 'invoices', 'total'));
-}
-
 
 
 

@@ -34,8 +34,8 @@ class CustomerController extends Controller
                 $q->where('status', $request->status);
             });
         }
-
-        $customers = $query->latest()->get(); // Consider paginate() in production
+        $customers = $query->paginate(10);
+        // $customers = $query->latest()->get(); // Consider paginate() in production
 
         return view('admin.customers.index', compact('customers'));
     }

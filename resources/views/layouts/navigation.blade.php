@@ -105,7 +105,21 @@
         <x-responsive-nav-link :href="route('lines.all')" :active="request()->routeIs('lines.*')">{{ __('messages.lines') }}</x-responsive-nav-link>
         <x-responsive-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">{{ __('messages.invoices') }}</x-responsive-nav-link>
         <x-responsive-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.*')">{{ __('messages.permissions') }}</x-responsive-nav-link>
+<div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" class="flex items-center gap-1 px-3 py-2 text-gray-600 hover:text-gray-800 transition">
+                            {{ __('messages.requests') }}
+                            <svg class="h-4 w-4 transition" :class="{ 'rotate-180': open }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
 
+                        <div x-show="open" @click.away="open = false"
+                             class="absolute mt-2 bg-white rounded shadow-lg border z-50 w-48">
+                            <a href="{{ route('requests.all') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📄 {{ __('messages.all_requests') }}</a>
+                            <a href="{{ route('requests.summary') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">📊 {{ __('messages.summary') }}</a>
+                            <a href="{{ route('requests.history') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">🕓 {{ __('messages.history') }}</a>
+                        </div>
+                    </div>
         <div class="pt-4 border-t border-gray-200">
             <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
             <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
